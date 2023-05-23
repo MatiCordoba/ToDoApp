@@ -14,6 +14,10 @@ if (localStorage.getItem("tasks")) {
     })
 }
 
+
+
+
+
 todoForm.addEventListener('submit', (e) => {
     e.preventDefault()
 
@@ -38,13 +42,31 @@ todoForm.addEventListener('submit', (e) => {
     mainInput.focus()
 })
 
+
+
 todoList.addEventListener('click', (e) => {
-    if(e.target.classList.contains('remove-task')){
+    if (e.target.classList.contains('remove-task') || e.target.parentElement.classList.contains('remove-task') || e.target.parentElement.parentElement.classList.contains('remove-task')) {
         const taskId = e.target.closest('li').id
 
         removeTask(taskId)
     }
 })
+
+todoList.addEventListener('keydown', (e) => {
+    if (e.keyCode === 13) {
+        e.preventDefault()
+
+        e.target.blur()
+    }
+})
+
+
+todoList.addEventListener('input', (e) => {
+    const taskId = e.target.closest('li').id
+
+    updateTask(taskId, e.target)
+})
+
 
 
 function createTask(task) {
@@ -56,8 +78,7 @@ function createTask(task) {
         taskEl.classList.add('complete')
     }
 
-    const taskElMarkup = 
-    `
+    const taskElMarkup = `
         <div>
             <input type="checkbox" name="tasks" id="${task.id}" ${task.isCompleted ? 'checked' : ''}>
             <span ${!task.isCompleted ? 'contenteditable' : ''}>${task.name}</span>
@@ -86,11 +107,36 @@ function countTasks() {
 }
 
 function removeTask(taskId){
-    tasks = tasks.filter(task => task.id !== parseInt(taskId))
+    tasks = tasks.filter((task) => task.id != parseInt(taskId))
 
     localStorage.setItem('tasks', JSON.stringify(tasks))
 
     document.getElementById(taskId).remove()
+
+    countTasks()
+}
+
+function updateTask(taskId, el) {
+    const task = tasks.find((task) => task.id == parseInt(taskId))
+
+    if (el.hasAttribute('contenteditable')) {
+        task.name = el.textContent
+    } else {
+        const span = el.nextElementSibling
+        const parent = el.closest('li')
+
+        task.isCompleted = !task.isCompleted
+        
+        if (task.isCompleted) {
+            span.removeAttribute('contenteditable')
+            parent.classList.add('complete')
+        } else {
+            span.setAttribute('contenteditable', 'true')
+            parent.classList.remove('complete')
+        }
+    }
+
+    localStorage.setItem('tasks', JSON.stringify(tasks))
 
     countTasks()
 }

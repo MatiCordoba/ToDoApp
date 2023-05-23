@@ -38,6 +38,13 @@ todoForm.addEventListener('submit', (e) => {
     mainInput.focus()
 })
 
+todoList.addEventListener('click', (e) => {
+    if(e.target.classList.contains('remove-task')){
+        const taskId = e.target.closest('li').id
+
+        removeTask(taskId)
+    }
+})
 
 
 function createTask(task) {
@@ -66,4 +73,24 @@ function createTask(task) {
     taskEl.innerHTML = taskElMarkup
 
     todoList.appendChild(taskEl)
+
+    countTasks()
+}
+
+function countTasks() {
+    const completedTasksArray = tasks.filter((task) => task.isCompleted === true)
+
+    totalTasks.textContent = tasks.length
+    completedTasks.textContent = completedTasksArray.length
+    remainingTasks.textContent = tasks.length -  completedTasksArray.length
+}
+
+function removeTask(taskId){
+    tasks = tasks.filter(task => task.id !== parseInt(taskId))
+
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+
+    document.getElementById(taskId).remove()
+
+    countTasks()
 }
